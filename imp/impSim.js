@@ -1,3 +1,14 @@
+var currentPosition
+var mushroomLevels
+var stars
+var ordDiceAvailable
+var luckyDiceAvailable
+var moveForward
+var doubleStars
+var doubleRoll
+var rollTwoDice
+var karmaEnabled
+
 function rollOrdinaryDice() {
     return Math.floor(Math.random() * 6) + 1
 }
@@ -25,6 +36,9 @@ function StarryMushrooms(currentPosition, roll) {
     }
     if (currentPosition < 18 && 18 < newPosition) {
         addStars += 2 + mushroomLevels[3]
+    }
+    if (currentPosition < 24 && 24 < newPosition) {
+        addStars += 2 + mushroomLevels[1]
     }
     if (doubleStars) {
         addStars *= 2
@@ -182,38 +196,6 @@ function getRoll() {
     return roll
 }
 
-function resetSimulation() {
-    currentPosition = 0
-    mushroomLevels = {
-        1: 1, 
-        2: 1, 
-        3: 1
-    }
-    stars = 0
-    ordDiceAvailable = 78
-    luckyDiceAvailable = 0
-    moveForward = true
-    doubleStars = false
-    doubleRoll = false
-    rollTwoDice = false
-    karmaEnabled = false
-}
-
-var currentPosition
-var mushroomLevels
-var stars
-var ordDiceAvailable
-var luckyDiceAvailable
-var moveForward
-var doubleStars
-var doubleRoll
-var rollTwoDice
-var karmaEnabled
-
-var starsArray = []
-var simulations = 1000000
-const debug = false
-
 function runSimulation() {
     resetSimulation()
 
@@ -233,10 +215,6 @@ function runSimulation() {
     return stars
 }
 
-for (let i = 0; i < simulations; i++) {
-    stars = runSimulation()
-    starsArray.push(stars)
-}
 
 function getBin(num) {
     let bins = [0, 80, 110, 140, 170, 200, 230, 260, 300, 999]
@@ -247,19 +225,60 @@ function getBin(num) {
     }
 }
 
-let binNum = {}
 
-for (const star of starsArray) {
-    const bin = getBin(star)
-    binNum[bin] = ++binNum[bin] || 1
+
+function runAllSimulations(simulations) {
+    var binNum = {}
+    for (let i = 0; i < simulations; i++) {
+        stars = runSimulation()
+        starsArray.push(stars)
+    }
+
+    for (const star of starsArray) {
+        const bin = getBin(star)
+        binNum[bin] = ++binNum[bin] || 1
+    }
+
+    console.log(starsArray)
+    var starsTotal = starsArray.reduce((total, num) => {return total + num}, 0)
+    console.log('Avg Stars: ' + 1.0 * starsTotal / simulations)
+
+    for (let i in binNum) {
+        let perc = 100.0 * binNum[i] / simulations
+        console.log(`bin${i}: ${perc}%`)
+    }
 }
 
-console.log(starsArray)
-var starsTotal = starsArray.reduce((total, num) => {return total + num}, 0)
-console.log('Avg Stars: ' + 1.0 * starsTotal / simulations)
+function resetSimulation() {
+    currentPosition = 0
+    mushroomLevels = {
+        1: 1, 
+        2: 1, 
+        3: 1
+    }
+    stars = 0
+    ordDiceAvailable = 24
+    luckyDiceAvailable = 0
+    moveForward = true
+    doubleStars = false
+    doubleRoll = false
+    rollTwoDice = false
+    karmaEnabled = false
 
-
-for (let i in binNum) {
-    let perc = 100.0 * binNum[i] / simulations
-    console.log(`bin${i}: ${perc}%`)
+    // Striderxo
+    // currentPosition = 12
+    // mushroomLevels = {
+    //     1: 2, 
+    //     2: 3, 
+    //     3: 1
+    // }
+    // stars = 48
+    // ordDiceAvailable = 54
+    // luckyDiceAvailable = 1
 }
+
+var starsArray = []
+var simulations = 1000000
+const debug = false
+
+runAllSimulations(simulations)
